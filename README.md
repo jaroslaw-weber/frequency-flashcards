@@ -1,20 +1,18 @@
-# create-svelte
+# frequency flashcard
 
-Everything you need to build a Svelte project, powered by [`create-svelte`](https://github.com/sveltejs/kit/tree/master/packages/create-svelte);
+Generates word frequency list from a text.
+Can export the list to json or csv file.
 
-## Creating a project
+## how can I use it?
 
-If you're seeing this, you've probably already done this step. Congrats!
+You can use the tool at:
 
-```bash
-# create a new project in the current directory
-npm init svelte@next
+https://frequency-flashcards.netlify.app/
 
-# create a new project in my-app
-npm init svelte@next my-app
-```
+## built with svelte
 
-> Note: the `@next` is temporary
+I really enjoyed creating this project. Svelte helped me decrease unnecessary bloat from code.
+
 
 ## Developing
 
