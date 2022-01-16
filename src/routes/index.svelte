@@ -1,25 +1,23 @@
 <script lang="ts">
 	import * as splitToWords from 'split-to-words';
+	import { WordCount } from '../schema/WordCount';
 	import DownloadButton from '../components/DownloadButton.svelte';
 	import PrimaryButton from '../components/PrimaryButton.svelte';
 	import SecondaryButton from '../components/SecondaryButton.svelte';
+	import FrequencyTable from '../components/FrequencyTable.svelte';
 
-	class WordCount {
-		word: string;
-		count: number;
-	}
 	let placeholder =
 		'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.';
 	let sampleText: string =
 		'This is sample text. You can see frequency list of words in this text in the table below.';
 	let rawText: string = '';
-	let frequencyArray: WordCount[] = [];
+	let frequency: WordCount[] = [];
+	let jsonBlob: Blob = undefined;
+	let jsonBlobUrl: string = undefined;
+	let csvBlob: Blob = undefined;
+	let csvBlobUrl: string = undefined;
 
-	let jsonBlob = undefined;
-	let jsonBlobUrl = undefined;
-	let csvBlob = undefined;
-	let csvBlobUrl = undefined;
-
+	/** convert array to csv */
 	function toCsv(data: any[]): string {
 		let csv = '';
 		let header = Object.keys(data[0]).join(',');
@@ -28,6 +26,8 @@
 		csv += header + '\n' + values;
 		return csv;
 	}
+
+	/** converts string to blob (for donwloading) */
 	function createBlob(text: string): Blob {
 		return new Blob([text], { type: 'text/plain' });
 	}
@@ -36,16 +36,13 @@
 		return URL.createObjectURL(blob);
 	}
 
-	function goToUrl(url: string) {
-		location.href = url;
-	}
-
 	function onClickProcess() {
-		frequencyArray = getFrequencyList(rawText);
+		frequency = getFrequencyList(rawText);
 		//create downloadable json file
-		createDownloadableFiles(frequencyArray);
+		createDownloadableFiles(frequency);
 	}
 
+	/** prepares .json and .csv files */
 	function createDownloadableFiles(array: any[]) {
 		jsonBlob = createBlob(JSON.stringify(array));
 		jsonBlobUrl = createBlobUrl(jsonBlob);
@@ -60,6 +57,7 @@
 		onClickProcess();
 	}
 
+	/** convert raw text to word frequency list */
 	function getFrequencyList(input: string): WordCount[] {
 		let list = [];
 		const words = splitToWords(input);
@@ -88,7 +86,9 @@
 
 <section class=" p-8 lg:p-0 lg:w-1/2 lg:mx-auto mt-12 mb-20">
 	<p class="text-3xl mb-6  text-center text-blue-600">frequency flashcards</p>
-	<p class=" text-center text-gray-600">generate word frequency lists <br>and export them to Anki or Quizlet</p>
+	<p class=" text-center text-gray-600">
+		generate word frequency lists <br />and export them to Anki or Quizlet
+	</p>
 
 	<p class="pl-4 mt-10">paste your text below</p>
 
@@ -98,20 +98,10 @@
 		<p>or</p>
 		<SecondaryButton on:click={onClickTrySample}>see sample</SecondaryButton>
 	</div>
-	{#if frequencyArray.length > 0}
+	{#if frequency.length > 0}
 		<p class="text-3xl mt-10 mb-6 text-center ">word frequency list</p>
-		<div class="flex flex-col rounded border">
-			<div class="flex bg-blue-400 text-white py-2 px-4 rounded-t">
-				<p class="flex-1">word</p>
-				<p class="flex-1">count</p>
-			</div>
-			{#each frequencyArray as row}
-				<div class="flex odd:bg-blue-50 py-2 px-4">
-					<p class="flex-1">{row.word}</p>
-					<p class="flex-1">{row.count}</p>
-				</div>
-			{/each}
-		</div>
+		<FrequencyTable {frequency} />
+
 		<div class="my-6" />
 		<DownloadButton url={jsonBlobUrl} filename="frequency-list.json"
 			>download as json</DownloadButton
