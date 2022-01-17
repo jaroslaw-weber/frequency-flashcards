@@ -1,5 +1,5 @@
 <script lang="ts">
-	import * as splitToWords from 'split-to-words';
+	import splitToWords from 'split-to-words';
 	import { WordCount } from '../schema/WordCount';
 	import DownloadButton from '../components/DownloadButton.svelte';
 	import PrimaryButton from '../components/PrimaryButton.svelte';
