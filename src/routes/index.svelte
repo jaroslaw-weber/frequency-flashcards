@@ -5,6 +5,8 @@
 	import PrimaryButton from '../components/PrimaryButton.svelte';
 	import SecondaryButton from '../components/SecondaryButton.svelte';
 	import FrequencyTable from '../components/FrequencyTable.svelte';
+	import { wordsToIgnore } from '../store';
+	import { get as storeGet } from 'svelte/store';
 
 	let placeholder =
 		'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.';
@@ -16,6 +18,24 @@
 	let jsonBlobUrl: string = undefined;
 	let csvBlob: Blob = undefined;
 	let csvBlobUrl: string = undefined;
+
+	wordsToIgnore.subscribe((ignore) => {
+		frequency = filterWords(frequency, ignore);
+	});
+
+	function onClickResetIgnoreList() {
+		//reset "ignore words" list
+
+		wordsToIgnore.update((x) => {
+			x.clear();
+			return x;
+		});
+	}
+
+	/** remove words that are in "ignore" set */
+	function filterWords(words: WordCount[], ignore: Set<string>) {
+		return words.filter((w) => !ignore.has(w.word));
+	}
 
 	/** convert array to csv */
 	function toCsv(data: any[]): string {
@@ -38,6 +58,9 @@
 
 	function onClickProcess() {
 		frequency = getFrequencyList(rawText);
+		frequency = filterWords(frequency, storeGet(wordsToIgnore));
+		//filter words that are in "ignore word list"
+		wordsToIgnore.update((x) => x);
 		//create downloadable json file
 		createDownloadableFiles(frequency);
 	}
@@ -108,5 +131,8 @@
 		>
 		<p class="m-3">want to import to Anki or Quizlet?</p>
 		<DownloadButton url={csvBlobUrl} filename="frequency-list.csv">download as csv</DownloadButton>
+
+		<div class="my-3" />
+		<SecondaryButton on:click={onClickResetIgnoreList}>restore deleted words</SecondaryButton>
 	{/if}
 </section>
